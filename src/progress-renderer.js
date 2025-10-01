@@ -1,4 +1,5 @@
 import readline from "readline";
+import path from "path";
 
 const ALT_BUFFER_ENABLE = "\u001b[?1049h";
 const ALT_BUFFER_DISABLE = "\u001b[?1049l";
@@ -34,6 +35,7 @@ export default class ProgressRenderer {
 
         this._finalSnapshot = null;
         this._fallbackRenderedOnce = false;
+        this.nameColumnWidth = 70; // largura usada para alinhar as barras com o link
     }
 
     track(tasks) {
@@ -286,9 +288,9 @@ export default class ProgressRenderer {
                 section.items.forEach((task) => {
                     const line = this._renderTaskLine(task, spinner);
                     if (task.status === "running") {
-                        bodyLines.push(`${spinner}${line}`);
+                        bodyLines.push(`${spinner} ${line}`);
                     } else {
-                        bodyLines.push(` ${line}`);
+                        bodyLines.push(`  ${line}`);
                     }
                 });
             }
@@ -344,18 +346,18 @@ export default class ProgressRenderer {
     }
 
     _renderTaskLine(task, spinnerFrame) {
-        const name = task.fileName;
+        const displayName = formatDestination(task);
 
         if (task.status === "failed") {
             const message = (task.error?.message || "falha")
                 .replace(/\s+/g, " ")
                 .trim();
-            return `✖ ${name} — ${message}`;
+            return `✖ ${displayName} — ${message}`;
         }
 
         if (task.status === "completed") {
             const sizeLabel = task.totalBytes ? formatBytes(task.totalBytes) : "completo";
-            return `✔ ${name} (${sizeLabel})`;
+            return `✔ ${displayName} (${sizeLabel})`;
         }
 
         const percent = Math.min(task.progress || 0, 100);
@@ -366,18 +368,18 @@ export default class ProgressRenderer {
 
         if (task.status === "running") {
             const progressLabel = total ? `${downloaded} / ${total}` : downloaded;
-            const paddedName = name.padEnd(40, ' ');
-            return ` ${paddedName} |${bar}| ${percent.toFixed(1)}% ${progressLabel}`;
+            const paddedName = padForColumn(displayName, this.nameColumnWidth);
+            return `${paddedName} |${bar}| ${percent.toFixed(1)}% ${progressLabel}`;
         }
 
         // queued
         if (task.downloadedBytes > 0 && task.totalBytes > 0) {
             const progressLabel = `${downloaded} / ${total}`;
-            const paddedName = name.padEnd(40, ' ');
-            return ` ${paddedName} |${bar}| ${percent.toFixed(1)}% ${progressLabel} (na fila)`;
+            const paddedName = padForColumn(displayName, this.nameColumnWidth);
+            return `${paddedName} |${bar}| ${percent.toFixed(1)}% ${progressLabel} (na fila)`;
         }
 
-        return ` ${name}`;
+        return `${displayName}`;
     }
 
     _composeSummary() {
@@ -440,4 +442,19 @@ function formatDuration(seconds) {
         return `${mins}m ${remaining}s`;
     }
     return `${remaining}s`;
+}
+
+function formatDestination(task) {
+    if (!task?.destinationPath) {
+        return task?.fileName ?? "";
+    }
+
+    return path.basename(task.destinationPath);
+}
+
+function padForColumn(value, width) {
+    if (value.length >= width) {
+        return value;
+    }
+    return value.padEnd(width, ' ');
 }

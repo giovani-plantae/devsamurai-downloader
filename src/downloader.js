@@ -18,7 +18,15 @@ export default class Downloader {
 
     async initialize() {
         await fs.ensureDir(this.outputDir);
-        const links = await this.fetchDownloadLinks();
+        let links;
+        try {
+            links = await this.fetchDownloadLinks();
+        } catch (error) {
+            console.error("Não foi possível acessar a plataforma DevSamurai no momento.");
+            console.error("Verifique a disponibilidade manualmente: https://class.devsamurai.com.br/");
+            console.error(`Motivo: ${error.message}`);
+            return false;
+        }
 
         this.tasks = links.map((url) => {
             const fileName = decodeURIComponent(path.basename(url));
@@ -31,10 +39,23 @@ export default class Downloader {
         await Promise.all(
             this.tasks.map((t) => limit(() => t.prepare()))
         );
+
+        if (this.tasks.length === 0) {
+            console.warn("Nenhum arquivo .zip foi encontrado na plataforma neste momento.");
+            console.warn("Confira manualmente: https://class.devsamurai.com.br/");
+            return false;
+        }
+
+        return true;
     }
 
     async fetchDownloadLinks() {
-        const response = await axios.get(this.baseUrl);
+        let response;
+        try {
+            response = await axios.get(this.baseUrl);
+        } catch (error) {
+            throw new Error(error.message || "Falha ao acessar os links");
+        }
         const $ = cheerio.load(response.data);
         const links = [];
 
@@ -62,6 +83,9 @@ export default class Downloader {
     }
 
     async start() {
+        if (this.tasks.length === 0) {
+            return;
+        }
         const executeBatch = async (tasks) => {
             const limit = pLimit(this.maxConcurrent);
             await Promise.all(

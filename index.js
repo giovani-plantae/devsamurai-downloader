@@ -61,6 +61,9 @@ for (let i = 0; i < args.length; i += 1) {
 const downloader = new Downloader(BASE_URL, OUTPUT_DIR, maxConcurrent, retryFailed);
 
 (async () => {
-    await downloader.initialize();
+    const ready = await downloader.initialize();
+    if (!ready) {
+        return;
+    }
     await downloader.start();
 })();
