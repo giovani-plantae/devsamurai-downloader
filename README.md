@@ -1,6 +1,6 @@
 # DevSamurai Downloader
 
-Ferramenta CLI em Node.js para baixar, em lote, todos os cursos disponibilizados pela DevSamurai e acompanhar o progresso em tempo real no terminal.
+Ferramenta CLI em Node.js para baixar, em lote, todos os cursos disponibilizados pela [DevSamurai](https://class.devsamurai.com.br/) e acompanhar o progresso em tempo real no terminal.
 
 > **Aviso oficial (resumo)**: a DevSamurai encerrou a plataforma, liberou o conteúdo (~100 GB) para download até dezembro de 2025 e recomenda fazer backup o quanto antes. Suporte: suporte@devsamurai.com.br.
 
