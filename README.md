@@ -22,4 +22,5 @@ Por padrão os arquivos são baixados para `./output`. A interface ocupa o termi
   ```bash
   node index.js --parallel 8
   ```
+- `--retry-failed [n]` / `-r [n]`: Tenta novamente os downloads que falharem. Sem valor assume 1 nova tentativa.
 - Interrompeu? Rode novamente o mesmo comando: as partes já baixadas são detectadas e o download é retomado.

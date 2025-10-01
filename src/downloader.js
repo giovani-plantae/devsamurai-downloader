@@ -7,10 +7,11 @@ import FileDownloadTask from "./file-download-task.js";
 import ProgressRenderer from "./progress-renderer.js";
 
 export default class Downloader {
-    constructor(baseUrl, outputDir, maxConcurrent = 5) {
+    constructor(baseUrl, outputDir, maxConcurrent = 5, retryFailed = 0) {
         this.baseUrl = baseUrl;
         this.outputDir = outputDir;
         this.maxConcurrent = maxConcurrent;
+        this.retryFailed = Math.max(0, retryFailed);
         this.tasks = [];
         this.progressRenderer = new ProgressRenderer();
     }
@@ -61,32 +62,57 @@ export default class Downloader {
     }
 
     async start() {
-        const limit = pLimit(this.maxConcurrent);
+        const executeBatch = async (tasks) => {
+            const limit = pLimit(this.maxConcurrent);
+            await Promise.all(
+                tasks.map((task) =>
+                    limit(async () => {
+                        try {
+                            await task.run(() => this.progressRenderer.onProgress(task));
+                            this.progressRenderer.onComplete(task);
+                        } catch (err) {
+                            this.progressRenderer.onError(task, err);
+                        }
+                    })
+                )
+            );
+        };
+
         this.progressRenderer.track(this.tasks);
+        this.progressRenderer.resetViewport();
         this.progressRenderer.start();
 
-        const runnable = this.tasks.filter((t) => t.status !== "completed");
+        let attempts = 0;
+        let pending = this.tasks.filter((t) => t.status !== "completed");
 
-        const results = await Promise.allSettled(
-            runnable.map((task) =>
-                limit(async () => {
-                    try {
-                        await task.run(() => this.progressRenderer.onProgress(task));
-                        this.progressRenderer.onComplete(task);
-                    } catch (err) {
-                        this.progressRenderer.onError(task, err);
-                    }
-                })
-            )
-        );
+        while (pending.length > 0) {
+            await executeBatch(pending);
+
+            const failedNow = pending.filter((task) => task.status === "failed");
+            if (failedNow.length === 0) {
+                break;
+            }
+
+            if (attempts >= this.retryFailed) {
+                break;
+            }
+
+            attempts += 1;
+
+            failedNow.forEach((task) => {
+                task.status = "queued";
+                task.error = null;
+            });
+
+            pending = failedNow;
+        }
 
         this.progressRenderer.stop();
 
-        // Throw if any failed (to signal non-zero exit if desired)
-        const failures = results.filter(r => r.status === 'rejected');
-        if (failures.length > 0) {
-            const err = new Error(`${failures.length} downloads falharam`);
-            err.failures = failures;
+        const stillFailed = this.tasks.filter((task) => task.status === "failed");
+        if (stillFailed.length > 0) {
+            const err = new Error(`${stillFailed.length} downloads falharam`);
+            err.failures = stillFailed.map((task) => task.fileName);
             throw err;
         }
     }

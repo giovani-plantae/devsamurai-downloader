@@ -25,6 +25,7 @@ export default class ProgressRenderer {
         this.viewportOffset = 0;
         this.visibleCapacity = 0;
         this.screenRows = process.stdout.rows ?? 24;
+        this._userScrolled = false;
 
         this._boundHandleInput = null;
         this._boundHandleResize = null;
@@ -37,6 +38,11 @@ export default class ProgressRenderer {
 
     track(tasks) {
         this.tasks = tasks;
+    }
+
+    resetViewport() {
+        this.viewportOffset = 0;
+        this._userScrolled = false;
     }
 
     onProgress() {
@@ -53,6 +59,8 @@ export default class ProgressRenderer {
 
     start() {
         if (this.interval) return;
+
+        this.resetViewport();
 
         if (this.isTty) {
             this._enterAltScreen();
