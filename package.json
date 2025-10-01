@@ -1,0 +1,11 @@
+{
+  "name": "devsamurai-downloader",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "fs-extra": "^11.1.1",
+    "p-limit": "^4.0.0"
+  }
+}
