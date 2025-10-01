@@ -1,28 +1,34 @@
 # DevSamurai Downloader
 
-Ferramenta em Node.js para catalogar links de cursos [DevSamurai](https://class.devsamurai.com.br/), baixar tudo em lote e acompanhar o progresso em tempo real direto no terminal. Downloads interrompidos podem ser retomados graças aos arquivos `.part` reutilizados.
+Ferramenta CLI em Node.js para baixar, em lote, todos os cursos disponibilizados pela DevSamurai e acompanhar o progresso em tempo real no terminal.
 
-> **Aviso oficial (resumo)**: A DevSamurai encerrou a plataforma, liberou todo o conteúdo (~100 GB) para download até dezembro de 2025 e recomenda que os backups sejam feitos o quanto antes. Suporte: suporte@devsamurai.com.br.
+> **Aviso oficial (resumo)**: a DevSamurai encerrou a plataforma, liberou o conteúdo (~100 GB) para download até dezembro de 2025 e recomenda fazer backup o quanto antes. Suporte: suporte@devsamurai.com.br.
 
-## Pré‑requisitos
+## Features
 
-- Node.js 18+ (recomendado 20+)
-- npm para instalar dependências (`npm install`)
+- Scraper automático de links `.zip` na página oficial.
+- Retomada de downloads interrompidos (arquivos `.part`).
+- Interface fullscreen estilo npm/docker (spinner, barras, ETA, navegação por setas).
+- Concorrência configurável e retentativas automáticas para falhas.
 
-## Uso rápido
+## Como usar
 
 ```bash
+git clone https://github.com/giovani-plantae/devsamurai-downloader.git
+cd devsamurai-downloader
 npm install
 node index.js
 ```
 
-Por padrão os arquivos são baixados para `./output`. A interface ocupa o terminal inteiro enquanto os downloads estão ativos; use `↑ ↓ PgUp PgDn` para navegar entre as seções.
+## Parâmetros
 
-## Opções úteis
+- `--parallel <n>` / `-p <n>` / `<n>`
+  - Define quantos downloads simultâneos rodar (padrão: 5).
+- `--retry-failed [n]` / `-r [n]`
+  - Habilita novas tentativas para arquivos que falharem (sem valor = 1 nova tentativa).
 
-- `--parallel <n>` / `-p <n>` / `<n>`: Define quantos downloads simultâneos serão executados. Exemplo:
-  ```bash
-  node index.js --parallel 8
-  ```
-- `--retry-failed [n]` / `-r [n]`: Tenta novamente os downloads que falharem. Sem valor assume 1 nova tentativa.
-- Interrompeu? Rode novamente o mesmo comando: as partes já baixadas são detectadas e o download é retomado.
+Exemplo:
+
+```bash
+node index.js --parallel 8 --retry-failed 2
+```
