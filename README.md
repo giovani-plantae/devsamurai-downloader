@@ -8,7 +8,7 @@ Ferramenta CLI em Node.js para baixar, em lote, todos os cursos disponibilizados
 
 - Scraper automático de links `.zip` na página oficial.
 - Retomada de downloads interrompidos (arquivos `.part`).
-- Interface fullscreen estilo npm/docker (spinner, barras, ETA, navegação por setas).
+- Interface CLI.
 - Concorrência configurável e retentativas automáticas para falhas.
 
 ## Como usar
