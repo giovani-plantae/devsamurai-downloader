@@ -1,6 +1,8 @@
 # DevSamurai Downloader
 
-Ferramenta em Node.js para catalogar links de cursos DevSamurai, baixar tudo em lote e acompanhar o progresso em tempo real direto no terminal. Downloads interrompidos podem ser retomados graças aos arquivos `.part` reutilizados.
+Ferramenta em Node.js para catalogar links de cursos [DevSamurai](https://class.devsamurai.com.br/), baixar tudo em lote e acompanhar o progresso em tempo real direto no terminal. Downloads interrompidos podem ser retomados graças aos arquivos `.part` reutilizados.
+
+> **Aviso oficial (resumo)**: A DevSamurai encerrou a plataforma, liberou todo o conteúdo (~100 GB) para download até dezembro de 2025 e recomenda que os backups sejam feitos o quanto antes. Suporte: suporte@devsamurai.com.br.
 
 ## Pré‑requisitos
 
